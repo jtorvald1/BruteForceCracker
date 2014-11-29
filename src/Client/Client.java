@@ -10,7 +10,6 @@ import java.util.Scanner;
 public class Client {
     
     private Scanner passwordFile;
-    private Scanner inputServer;
     private final EncrypterEncoder encrypterAndEncoder;
     private final ArrayList<UserInfo> users;
 
@@ -19,24 +18,29 @@ public class Client {
         encrypterAndEncoder = new EncrypterEncoder();
     }
     
-    private void startClient() throws IOException
+    private void startClient() throws IOException, ClassNotFoundException
     {
         Socket socket = new Socket("localHost", 8888);
-        inputServer = new Scanner(socket.getInputStream());
+        Scanner fromServer = new Scanner(socket.getInputStream());
         passwordFile = new Scanner(new File("passwords.txt"));
         readUserInfo();
-        receiveAndCheck();
+        receiveAndCheck(fromServer);
         
         socket.close();
     }
         
-    private void receiveAndCheck()
+    private void receiveAndCheck(Scanner in) throws IOException, ClassNotFoundException
     {
-        String word;
-        
-        while(inputServer.hasNext())
+        ArrayList<String> partDictionary = new ArrayList<>();
+
+        while(in.hasNext())
         {
-            word = inputServer.nextLine();
+            String word = in.next();
+            partDictionary.add(word);
+        }
+        System.out.println(partDictionary.size());
+        for(String word: partDictionary)
+        {
             checkWordWithVariations(word);
         }
     }
@@ -48,7 +52,7 @@ public class Client {
         checkSingleWord(StringUtilities.capitalize(word));
         checkSingleWord(new StringBuilder(word).reverse().toString());
 
-        /*for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 100; i++)
         {
             String possiblePasswordEndDigit = word + i;
             checkSingleWord(possiblePasswordEndDigit);
@@ -65,7 +69,7 @@ public class Client {
                 String possiblePasswordStartEndDigit = i + word + j;
                 checkSingleWord(possiblePasswordStartEndDigit);
             }
-        }*/
+        }
     }
     
     private void checkSingleWord(String word)
@@ -79,7 +83,7 @@ public class Client {
         }
     }
     
-    public static void main(String args[]) throws IOException, NoSuchAlgorithmException
+    public static void main(String args[]) throws IOException, NoSuchAlgorithmException, ClassNotFoundException
     {
         new Client().startClient();
     }

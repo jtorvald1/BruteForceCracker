@@ -1,45 +1,49 @@
 package Server;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Scanner;
 import javax.swing.JOptionPane;
 
 public class Server {
     
-    private PrintWriter out;
-    private final BufferedReader bufferedReader;
+    private final Scanner in;
     private final int PORT = 8888;
-    private final int numberOfClients = 2;
+    private final int numberOfClients = 5;
 
     public Server() throws FileNotFoundException {
-        FileReader fileReader = new FileReader("dictionary.txt");
-        bufferedReader = new BufferedReader(fileReader);
+        in = new Scanner(new File("dictionary.txt"));
     }
 
-    private void startServer()
+    private void connectClients()
     {
         try
         {
             ServerSocket serverSocket = new ServerSocket(PORT);
             System.out.println("Waiting for clients to connect...");
-                        
-            PrintWriter[] writers = new PrintWriter[numberOfClients];
+
+            ArrayList<String> dictionary = readDictionary();
+            System.out.println("Total number: " + dictionary.size());
             
             int i = 0;
             while(i < numberOfClients)
             {
                 Socket socket = serverSocket.accept();
-                writers[i] = new PrintWriter(socket.getOutputStream());
+                PrintWriter out = new PrintWriter(socket.getOutputStream());
+                
+                TransferService transferService = new TransferService(numberOfClients, i, out, dictionary);
+                
+                Thread t = new Thread(transferService);
+                t.start();
+                
                 System.out.println("Client " + (i + 1) + " connected");               
                 i++;
             }
-            System.out.println("Executing crackers");
-            transferWords(writers);
         }
         catch(IOException e)
         {
@@ -47,31 +51,19 @@ public class Server {
         }                
     }
     
-    private void transferWords(PrintWriter[] writers) throws IOException
+    private ArrayList<String> readDictionary() throws IOException
     {
-        int client = 0;
+        ArrayList<String> dictionary = new ArrayList<>();
         
-        while(true)
+        while(in.hasNext())
         {
-            String word = bufferedReader.readLine();
-            out = writers[client];
-            out.println(word);
-            out.flush();
-            
-            if(word == null) break;
-            if(client < numberOfClients - 1)
-            {
-                client++;                
-            }         
-            else 
-            {
-                client = 0;
-            }  
+            dictionary.add(in.nextLine());
         }
+        return dictionary;
     }
     
     public static void main(String[] args) throws IOException
     {       
-        new Server().startServer();
+        new Server().connectClients();
     }
 }
