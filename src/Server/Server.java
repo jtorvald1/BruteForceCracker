@@ -14,7 +14,7 @@ public class Server {
     
     private final Scanner in;
     private final int PORT = 8888;
-    private final int numberOfClients = 3;
+    private final int numberOfClients = 2;
 
     public Server() throws FileNotFoundException {
         in = new Scanner(new File("dictionary.txt"));
