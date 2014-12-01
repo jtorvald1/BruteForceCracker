@@ -35,10 +35,9 @@ public class Client {
 
         while(in.hasNext())
         {
-            String word = in.next();
+            String word = in.nextLine();
             partDictionary.add(word);
         }
-        System.out.println(partDictionary.size());
         for(String word: partDictionary)
         {
             checkWordWithVariations(word);

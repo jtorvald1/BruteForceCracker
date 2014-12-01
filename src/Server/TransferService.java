@@ -31,7 +31,7 @@ public class TransferService implements Runnable{
     public void run()
     {
         double intermediate1 = client/ (float) numberOfClients;
-        System.out.println(intermediate1);
+        System.out.println("To index: " + intermediate1);
         int fromIndex = (int) (intermediate1 * dictionary.size());
         System.out.println("From index: " + fromIndex);
             
@@ -42,7 +42,6 @@ public class TransferService implements Runnable{
         for(int i = fromIndex; i < toIndex; i++)
         {
             String word = dictionary.get(i);
-            System.out.println(i);
             out.println(word);
             out.flush();
         }
